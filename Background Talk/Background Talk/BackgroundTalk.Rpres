@@ -1,0 +1,381 @@
+Time Series Interpolation Algorithms
+========================================================
+author: Melissa Van Bussel
+date: February 25th, 2019
+autosize: false
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE, fig.align = "center", fig.width = 12)
+```
+
+Time Series
+========================================================
+
+- A sequence of observations, $\{X_t\}$,  one taken at each time $t$ and arranged in chronological order
+- Stock market predictions, weather forecasting, natural disaster prediction / prevention
+- Typically make the assumption of evenly spaced observations
+
+```{r, echo = FALSE, fig.height = 4, fig.align = "center"}
+data("AirPassengers")
+plot(AirPassengers, 
+     main = "Monthly Totals of International Airline Passengers",
+     ylab = "Number of International Airline Passengers",
+     type = "l")
+```
+
+Trends
+==========================================================
+
+```{r, echo = FALSE, fig.width = 12}
+noise <- rnorm(500, 0, 5) 
+linear <- seq(1, 100, length.out = 500) + noise
+plot(linear, type = "l",
+     main = "Linear Trend", ylab = "", xlab = "Time")
+```
+
+Trends
+==========================================================
+
+```{r, echo = FALSE, fig.width = 12}
+noise <- rnorm(500, 0, 5) 
+time <- seq(1, 5, length.out = 500)
+exponential <- 2.5 ^ time + noise
+plot(exponential, type = "l",
+     main = "Exponential Trend",
+     xlab = "Time",
+     ylab = "")
+```
+
+Trends
+==========================================================
+
+```{r, echo = FALSE, fig.width = 12}
+noise <- rnorm(100, 0, 1)
+periodic <- sin(seq(1, 25, length.out = 500)) + noise
+plot(periodic, type = "l",
+     main = "Periodic Trend",
+     xlab = "Time", 
+     ylab = "")
+```
+
+Removing Trends
+==========================================================
+
+- Trends can be removed by *differencing* or by taking transformations
+
+Removing Exponential Trends
+==========================================================
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 12}
+noise <- rnorm(200, 0, 0.25) 
+time <- seq(1, 3, length.out = 200)
+exponential <- exp(time) + noise + 1
+par(mfrow = c(1, 2))
+plot(exponential, type = "l",
+     main = "Exponential Trend",
+     xlab = "Time",
+     ylab = "")
+plot(log(exponential), type = "l",
+     main = "Logarithmic Transformation",
+     ylab = "",
+     xlab = "Time")
+```
+
+Removing Linear Trends: Differencing
+==========================================================
+
+```{r, echo = FALSE, fig.height = 8, fig.width = 12}
+noise <- rnorm(500, 0, 5) 
+linear <- seq(1, 100, length.out = 500) + noise * 2
+differenced <- diff(linear)
+par(mfrow = c(1, 2))
+plot(linear, type = "l", 
+     main = "Series with Linear Trend",
+     ylab = "")
+plot(differenced, 
+     main = "Differenced Series", 
+     type = "l",
+     ylab = "")
+```
+
+Why would we want to remove trends?
+==========================================================
+
+- We want to predict future observations
+- which... means we need to model past observations 
+- and... to model past observations requires *stationarity*
+
+Stationary Processes
+==========================================================
+
+- Roughly speaking, a stationary process is one which isn't a function of time.
+- Formally: A process $Y_1, Y_2, ...$ is weakly stationary iff: 
+
+$$
+\begin{split}
+&\text{1. } \textbf{E}[Y_t] = \mu \quad \forall t \\
+&\text{2. } \textbf{Var}[Y_t] = \sigma^2 \quad \forall t, \sigma^2 < \infty \\
+&\text{3. } \textbf{Cov}[Y_t, Y_s] = \gamma(|t - s|) \quad \forall t,s \text{ for some } \gamma(h) \\ 
+\end{split}
+$$
+
+where $\gamma(h)$ is the autocovariance function. 
+
+Time for a Diagram!
+=========================================================
+
+- On the chalkboard!
+
+An example of a stationary process: White Noise
+=========================================================
+
+- WN processes have two parameters: $\mu$ and $\sigma^2$
+
+```{r, echo = FALSE}
+library(forecast)
+set.seed(12)
+wn1 <- arima.sim(model = list(order = c(0, 0, 0)),
+                 n = 150) 
+wn2 <- arima.sim(model = list(order = c(0, 0, 0)), 
+                 n = 150,
+                 mean = 4,
+                 sd = 2)
+par(mfrow = c(2, 1))
+plot(wn1, main = "White Noise Processes",
+     ylab = "")
+abline(h = 0, lty = 2)
+plot(wn2 + 1, ylab = "")
+abline(h = 0, lty = 2)
+```
+
+An example of a non-stationary process: Random Walks
+=========================================================
+
+- We don't have time to go into details, but for those of you who remember random walks from previous courses: they're non-stationary. 
+
+```{r, echo = FALSE, fig.height = 6, fig.width = 12}
+set.seed(12)
+wn <- list()
+y <- list()
+for (i in 1:1) {
+  wn[[i]] <- arima.sim(model = list(order = c(0, 0, 0)), 
+                n = 99)
+  y[[i]] <- vector(length = 100)
+  y[[i]][1] <- 0
+  for (j in 2:100) {
+    y[[i]][j] <- y[[i]][j - 1] + wn[[i]][j]
+  }
+}
+plot(y[[1]], type = "l",
+     main = "Random Walk Processes",
+     ylab = "",
+     xlab = "Time",
+     ylim = c(-10, 10))
+abline(h = 0, lty = 2)
+```
+
+The Autoregressive (AR) Model
+==========================================================
+
+- AR is an entire family of processes
+- We consider the simplest case: AR(1)
+- An AR(1) process regresses the current observation on the previous observation.
+
+AR(1) Processes
+==========================================================
+
+A process $Y_1, Y_2$, ... is an AR(1) process if: 
+
+$$
+Y_t - \mu = \phi (Y_{t-1} - \mu) + \epsilon_t, \quad \epsilon_t \sim WN(\mu, \sigma_{\epsilon}^2)
+$$
+
+- We won't go too deep into the details due to time constraints, but we will model a time series using an AR(1) process
+
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+- Consider a series that contains the US inflation rate by month
+- Load the data: 
+
+```{r}
+data(Mishkin, package = "Ecdat")
+inflation <- Mishkin[, 1]
+```
+
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+- Fit the AR(1) Model to it: 
+<small>
+```{r}
+AR1_inflation <- arima(inflation, order = c(1, 0, 0))
+AR1_inflation
+```
+</small>
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+- Plot the original series and the AR(1) Model on top of it:
+
+```{r, eval = FALSE}
+fitted_vals <- inflation - residuals(AR1_inflation)
+plot(inflation, main = "US Monthly Inflation Rates",
+     xlim = c(1950, 1991))
+lines(fitted_vals, type = "l",
+      ylab = "Inflation Rate",
+      col = "red",
+      lty = 2)
+legend("topright",
+       legend = c("Y", "Yhat"),
+       col = c("black", "red"),
+       lty = c(1, 2))
+```
+
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+```{r, echo = FALSE}
+fitted_vals <- inflation - residuals(AR1_inflation)
+plot(inflation, main = "US Monthly Inflation Rates",
+     xlim = c(1950, 1991))
+lines(fitted_vals, type = "l",
+      ylab = "Inflation Rate",
+      col = "red",
+      lty = 2)
+legend("topright",
+       legend = c("Y", "Yhat"),
+       col = c("black", "red"),
+       lty = c(1, 2))
+```
+
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+<small style = "font-size:0.7em">
+```{r, eval = FALSE}
+AR_forecast <- predict(AR1_inflation, n.ahead = 12)$pred
+AR_forecast_se <- predict(AR1_inflation, n.ahead = 12)$se
+plot(inflation, main = "US Monthly Inflation Rates",
+     xlim = c(1980, 1991),
+     ylab = "Inflation Rate")
+lines(fitted_vals, type = "l",
+      col = "red",
+      lty = 2)
+points(AR_forecast, type = "l", col = "blue")
+points(AR_forecast - 1.96 * AR_forecast_se, 
+       type = "l", col = "blue", lty = 2)
+points(AR_forecast + 1.96 * AR_forecast_se, 
+       type = "l", col = "blue", lty = 2)
+legend("topright",
+       legend = c("Y", "Yhat", "Forecasted Values", "95 percent CI"),
+       col = c("black", "red", "blue", "blue"),
+       lty = c(1, 2, 1, 2),
+       cex = 0.8)
+```
+</small>
+
+Modeling and Forecasting using an AR(1) Model
+==========================================================
+
+```{r, echo = FALSE}
+AR_forecast <- predict(AR1_inflation, n.ahead = 12)$pred
+AR_forecast_se <- predict(AR1_inflation, n.ahead = 12)$se
+plot(inflation, main = "US Monthly Inflation Rates",
+     xlim = c(1980, 1991),
+     ylab = "Inflation Rate")
+lines(fitted_vals, type = "l",
+      col = "red",
+      lty = 2)
+points(AR_forecast, type = "l", col = "blue")
+points(AR_forecast - 1.96 * AR_forecast_se, 
+       type = "l", col = "blue", lty = 2)
+points(AR_forecast + 1.96 * AR_forecast_se, 
+       type = "l", col = "blue", lty = 2)
+legend("topright",
+       legend = c("Y", "Yhat", "Forecasted Values", "95 percent CI"),
+       col = c("black", "red", "blue", "blue"),
+       lty = c(1, 2, 1, 2),
+       cex = 0.8)
+```
+
+ARIMA Models
+==========================================================
+
+- The example we just did was very simplistic
+- Typically use ARMA or ARIMA models
+
+So...what's the project?
+========================================================
+
+- As we just saw, it's really easy to model stationary time series
+- It's a few lines of code
+- But...not all data is nice
+
+What's happening here?
+========================================================
+
+```{r, echo = FALSE, fig.align = "center", include = FALSE, fig.width = 12}
+library(quantmod)
+getSymbols("AMZN", from = "2008-08-01", to = "2008-09-01")
+```
+
+```{r, echo = FALSE, fig.align = "center", fig.width = 12}
+dates <- seq(as.Date("2008-08-01"), 
+             as.Date("2008-08-29"), 
+             by = "days")
+AMZNdf <- data.frame(dates = dates, 
+                   close = rep(NA, length(dates)))
+AMZN <- as.data.frame(AMZN)
+for (i in 1:length(AMZNdf$dates)) {
+  index <- which(rownames(AMZN) == AMZNdf$dates[i])
+  if (length(index) != 0) {
+    AMZNdf$close[i] <- AMZN$AMZN.Close[index]  
+  }
+}
+plot(x = AMZNdf$dates, y = AMZNdf$close,
+     main = "Amazon's Daily Closing Stock Price", 
+     xlab = "Day",
+     ylab = "Closing Price",
+     type = "b")
+```
+
+Why else might there be missing values?
+==========================================================
+
+- Dealing with these missing values is the goal of this Honours Project
+
+Ok, so, why'd you bother talking about stationarity?
+==========================================================
+
+- In reality, it's rare to have stationary processes.
+- That's fine, because you can transform non-stationary processes into stationary processes
+- BUT, how do you interpolate missing values in non-stationary processes?
+
+Current Problems
+==========================================================
+
+- Not many algorithms that address non-stationary data 
+- Many algorithms are not implemented / freely available  
+- Performance of these algorithms has been evaluated inconsistently 
+- "Cherry Picking" (criteria, and example series)
+
+Goals 
+==========================================================
+
+- Implement existing interpolation algorithms in R, create open source / freely available package
+- Test a variety of interpolation algorithms on both simulated and real-world data (non-stationary)
+- Evaluate performance of algorithms with a number of criteria instead of just one
+- Algorithm of particular interest is written by our very own Wes
+- Sophie will explore this topic in much more depth for her thesis
+
+References
+==========================================================
+
+- Wesley S. Burr. Air Pollution and Health: Time Series Tools and Analysis. Queen's University, PhD thesis. 2012.
+
+- Wesley S. Burr (2012). `tsinterp`: A Time Series Interpolation Package for `R`. R Package.
+
+- Mathieu Lepot, Jean-Baptiste Aubin, and Francois H.L.R. Clemens. Interpolation in Time Series: An Introductive Overview of Existing Methods, Their Performance and Uncertainty Assessment. Water 2017, 9(10), 796.
+
+- DataCamp. "Introduction to Time Series Analysis" and "ARIMA Modeling with R".
