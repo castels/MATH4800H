@@ -39,7 +39,7 @@ The work presented in this document is for the course MATH4800H - Mathematics Ho
 
 # Background Reading 
 
-This section will provide a "crash course" in time series. This background is necessary in order to understand the context as well as the significance of the goals of this Honours Project.
+This section will provide a "crash course" in time series. This background is necessary in order to understand the context as well as the significance of the goals of this Honours Project. The definitions are taken from [4] and [5]. 
 
 ## Time Series
 
@@ -96,7 +96,7 @@ cov(iris$Petal.Length, iris$Petal.Width)
 
 The problem with covariance is that it is difficult to interpret, because it is dependent on the scale of the two variables. In the above example, it is clear that there is a positive association between the variables `Petal.Length` and `Petal.Width`, but it is unclear how strong that positive association is. 
 
-Instead, it is useful to scale the covariance of the two variables by their standard deviations. This is equivalent to calculation the *correlation* between the two variables. This is a more interpetable value -- recall that correlations can range from -1 to +1, where -1 represents a perfectly negative linear relationship, +1 represents a perfectly positive linear relationship, and 0 represents no linear assocation. 
+Instead, it is useful to scale the covariance of the two variables by their standard deviations. This is equivalent to calculating the *correlation* between the two variables. This is a more interpetable value -- recall that correlations can range from -1 to +1, where -1 represents a perfectly negative linear relationship, +1 represents a perfectly positive linear relationship, and 0 represents no linear assocation. 
 
 ```{r}
 cov(iris$Petal.Length, iris$Petal.Width) / (sd(iris$Petal.Length) * sd(iris$Petal.Width))
@@ -394,6 +394,7 @@ $$
 &\text{3. } \textbf{Cov}[X_t, X_s] = \gamma(|t - s|) \quad \forall t,s \text{ for some } \gamma(h) \\ 
 \end{split}
 $$
+
 where $\gamma(h)$ is the autocovariance function. 
 
 In other words, the third condition says that the covariance between two observations depends only on the *lag* (the distance $|t - s|$) between observations, and not on the indices $s$ and $t$ themselves. The covariance between $X$ at time $t$ and time $s$ depends only on how close $t$ and $s$ are. For example, the covariance of $X$ between times 1 and 4 is the same as the covariance between the times 5 and 8, since they both have the same lag. 
@@ -414,11 +415,11 @@ Any process which is not stationary is referred to as *non-stationary*. Random W
 
 ### Why does it matter? 
 
-Stationary processes are much easier to model, as they have less parameters. The estimators for these processes are quite straightforward as well. For example, the estimator the mean, $\mu$, is simply the sample average: that is, $\hat{\mu} = \bar{y}$. 
+Stationary processes are much easier to model, as they have less parameters. The estimators for these processes are quite straightforward as well. For example, the estimator of the mean, $\mu$, is simply the sample average: that is, $\hat{\mu} = \bar{y}$. 
 
 ### When is a process stationary? 
 
-In reality, it can be hard to find processes which are stationary. For example, it is quite common for financial / economical data to be non-stationary. With this being said, however, the changes in the series may exhibit stationarity. Transformations as discussed earlier can also be applied to time series before analysis and modeling in order to obtain stationary processes.
+In reality, it can be hard to find processes which are stationary. For example, it is quite common for financial/economical data to be non-stationary. With this being said, however, the changes in the series may exhibit stationarity. Transformations as discussed earlier can also be applied to time series before analysis and modeling in order to obtain stationary processes.
 
 ## The Autoregressive Model (AR)
 
@@ -492,7 +493,7 @@ AR1_Mishkin
 
 The slope was estimated as $\hat{\phi} =$ `r round(AR1_Mishkin$coef[1], 3)` while the mean was estimated as $\hat{\mu} =$ `r round(AR1_Mishkin$coef[2], 3)`, and the variance of the white noise was estimated to be $\hat{\sigma_{\epsilon}^2}$ =`r round(AR1_Mishkin$sigma2, 3)`.  
 
-The model procduces the following estimates for the series: 
+The model produces the following estimates for the series: 
 
 $$
 \hat{X_t} = \hat{\mu} + \hat{\phi}(X_{t-1} - \mu)
@@ -542,7 +543,7 @@ legend("topright",
        cex = 0.8)
 ```
 
-Note that the AR(1) process is just one of many in the family of AR(p) processes. This extension is as one would expect: An AR(p) process is defined as
+Note that the AR(1) process is just one of many in the family of AR($p$) processes. This extension is as one would expect: An AR($p$) process is defined as
 
 $$
 X_t = \phi_1X_{t-1} + \phi_2X_{t-2} + ... + \phi_pX_{t-p} + \epsilon_t, \quad \epsilon_t \sim \text{WN}(\mu, \sigma_{\epsilon}^2)
@@ -552,13 +553,13 @@ The extension in `R` is straightforward: just specify `order = c(p, 0, 0)` withi
 
 ## Moving Average (MA) Processes
 
-Consider the simplest Moving Average (MA): an MA(1) process. A time series $X_1, X_2, ...$ is said to be a *simple moving average process* iff: 
+Moving Average (MA) processes are another family of stochastic processes. Consider the simplest Moving Average (MA): an MA(1) process. A time series $X_1, X_2, ...$ is said to be a *simple moving average process* (an MA(1) process) iff: 
 
 $$
 X_t = \mu + \epsilon_t + \theta \epsilon_{t-1}
 $$
 
-where $\epsilon_t \sim \text{WN}(\mu, \sigma_{\epsilon}^2)$. This is quite similar, conceptually, to the AR(1) process, except that the current observation is regressed on the noise of the previous observation. Again, this process has 3 paramters. This time, the slope coefficent is represented by $\theta$. And, again, if the slope coefficient is zero, then the series $X_t$ is a white noise process. And, again...larger values of the slope coefficient correpond to higher autocorrelation, while negative values of $\theta$ correpond to series with periodic behavior.
+where $\epsilon_t \sim \text{WN}(\mu, \sigma_{\epsilon}^2)$. This is quite similar, conceptually, to the AR(1) process, except that the current observation is regressed on the noise of the previous observation. Again, this process has 3 paramters. This time, the slope coefficent is represented by $\theta$. Once again, if the slope coefficient is zero, then the series $X_t$ is a white noise process. Additionally, once again, larger values of the slope coefficient correspond to higher autocorrelation, while negative values of $\theta$ correpond to series with periodic behavior.
 
 The following are properties of an MA(1) process:
 
@@ -601,7 +602,7 @@ points(MA_forecast - 1.96 * MA_forecast_se,
        type = "l", col = "blue", lty = 2)
 points(MA_forecast + 1.96 * MA_forecast_se, 
        type = "l", col = "blue", lty = 2)
-legend("topright",
+legend("topleft",
        legend = c("X", "Xhat", "Forecasted Values", "95 percent CI"),
        col = c("black", "red", "blue", "blue"),
        lty = c(1, 2, 1, 2),
@@ -610,7 +611,7 @@ legend("topright",
 
 Note that the prediction line goes flat after the first prediction point. This is because the MA(1) model can only predict 1 step forward.
 
-MA(1) is just one simple example of the MA(q) family. A process is MA(q) if:
+MA(1) is just one simple example of the MA($q$) family. A process is MA($q$) if:
 
 $$
 \begin{split}
@@ -625,7 +626,7 @@ where the error terms are once again white noise.
 
 Autoregressive Moving Average (ARMA) models describe stochastic processes in terms of two polynomials: one for the autoregression (AR) and one for the moving average (MA). 
 
-A process $\{X_t\}$ is an ARMA(p,q) process if:
+A process $\{X_t\}$ is an ARMA($p,q$) process iff:
 
 1. It is stationary.
 2. It satisfies the following equation: 
@@ -664,7 +665,7 @@ Non-Stationary processes can be transformed into stationary processes. Typically
 
 # Interpolation Algorithms
 
-The models discussed in the previous section work very well, and are easy to use. Unfortunately, these methods are only useable when the data are "nice" -- that is, the time series must have a single observation at regularly spaced intervals. In reality, it is possible to obtain data which have missing points. This is problematic, because it breaks the assumption that the observations are evenly spaced. 
+The models discussed in the previous section work very well, and are easy to use. Unfortunately, these methods are only usable when the data are "nice" -- that is, the time series must have a single observation at regularly spaced intervals. In reality, it is possible to obtain data which have missing points. This is problematic, because it breaks the assumption that the observations are evenly spaced. 
 
 Missing observations in data can occur for a number of reasons. For example, consider closing stock prices: 
 
@@ -692,11 +693,11 @@ plot(x = AMZNdf$dates, y = AMZNdf$close,
 
 In this case, information is only available for business days, so there will be missing observations on weekends and holidays. 
 
-This is just one possible reason why a time series may have missing values. Another common reason that this occurs is because of equipment failure. It is also possible to have time series in which some observations need to be removed due to transcription error or unreliable results. 
+This is just one possible reason why a time series may have missing values. As mentioned in the background section, another common reason that this occurs is because of equipment failure. It is also possible to have time series in which some observations need to be removed due to transcription error or unreliable results. 
 
 When there are missing values in a time series, these points must be *interpolated* or *imputed*. This is a necessary step in order to model the series using the models discussed previously. 
 
-In this section, some interpolation algorithms will be presented. If they are not already available for use in R, they will be implemented in R.
+In this section, some interpolation algorithms will be presented. The information in the following section comes mainly from `R` documentation and [3], with other sources noted as used.
 
 For each of the following algorithms, a toy example will be used in order to demonstrate how the algorithms would work on a small scale. In a later section, all of these algorithms will be tested on real-world, large scale datasets. For now, though, consider the following example time series with missing points (denoted by NA): 
 
@@ -704,7 +705,7 @@ $$
 \{X_t\} = \{4, 7, 9, \text{NA, NA}, 6, 3, 5, \text{NA}, 12, 15\}
 $$
 
-It is important to note that, while some of these algorithms are very simplistic, even the simplest of algorithms (Nearest-Neighbor) are present in the literature as recently as 2014. This demonstrates that this is still a very active field of research, and that there is much work to be done in this area.
+It is important to note that, while some of these algorithms are very simplistic, even the simplest of algorithms (Nearest-Neighbor) are present in the literature as recently as 2014[3]. This demonstrates that this is still a very active field of research, and that there is much work to be done in this area.
 
 ## Nearest Neighbor Interpolation 
 
@@ -788,7 +789,7 @@ plot(X, main = "Nearest Neighbor Interpolation", type = "b", ylab = "")
 
 The nearest neighbor interpolation algorithm produces very jumpy, unrealistic results. 
 
-This algorithm was first presented (large scale) in 1980. While it may seem very simple, all of these algorithms are relatively "new", as these sorts of algorithms were not viable on a large scale before the invention of computers.
+While this algorithm may seem very simple, all of these algorithms are relatively "new", as these sorts of algorithms were not viable on a large scale before the invention of computers.
 
 ## Linear Interpolation
 
@@ -858,7 +859,7 @@ Even with this toy example, it is easy to see that this algorithm would perform 
 
 ## The na.approx Family of Functions in R 
 
-In R, there are a number of time series interpolation algorithms which have been implemented already. For example, the `zoo` package contains a family of functions, `na.approx`, for this purpose. The simplest of these is the `na.approx` function itself, which uses linear interpolation to fill missing values. This is indeed the exact same linear interpolation algorithm which was discussed above, except that the `na.approx` function also takes additional arguments (for example, the user can specify the `maxgap` argument, which represents the maximum number of consecutive NAs to fill. Any gaps which are larger than the value of `maxgap` will be left unchanged).
+In `R`, there are a number of time series interpolation algorithms which have been implemented already. For example, the `zoo` package contains a family of functions, `na.approx`, for this purpose. The simplest of these is the `na.approx` function itself, which uses linear interpolation to fill missing values. This is indeed the exact same linear interpolation algorithm which was discussed above, except that the `na.approx` function also takes additional arguments (for example, the user can specify the `maxgap` argument, which represents the maximum number of consecutive NAs to fill. Any gaps which are larger than the value of `maxgap` will be left unchanged).
 
 To demonstrate that they are indeed the same, consider our example from before: 
 
@@ -872,11 +873,11 @@ na.approx(x)
 
 Thus, the `na.approx` method is the exact same as the one presented in the subsection above. 
 
-It might seem like this is harmless, but a rather shocking fact is that when you Google search for "Time Series Interpolation in R", the first link that appears is a Stack Overflow question in which the person is told to use the `na.approx` function to interpolate the missing points in their series. It is alarming that such a simplistic method is being used on such a large scale. 
+It might seem like this is harmless, but a rather shocking fact is that a Google search for "Time Series Interpolation in R" yields a top result as a Stack Overflow question in which the person is told to use the `na.approx` function to interpolate the missing points in their series. It is alarming that such a simplistic method is being used on such a large scale. 
 
-Another member of the `na.approx` family of functions from the `zoo` package in R is the `na.spline` function. This function uses cubic spline interpolation. 
+Another member of the `na.approx` family of functions from the `zoo` package in R is the `na.spline` function. This function uses cubic spline interpolation[7]. 
 
-Cubic splines, in general, are interpolating polynomials. Given a set of $n +1$ data points at regularly spaced intervals, a cubic spline is denoted $S(x)$ and is a continuous cubic function connecting the endpoints. More formally, 
+Cubic splines, in general, are interpolating polynomials. Given a set of $n + 1$ data points at regularly spaced intervals, a cubic spline is denoted $S(x)$ and is a continuous cubic function connecting the endpoints. More formally, 
 
 Given $n+1$ points, ($x_i, y_i$), let $a = x_0 < x_1 < \dots < x_n = b$. Then the cubic spline $S(x)$ satisfies: 
 
@@ -927,7 +928,7 @@ Other `method` arguments that the `na.spline` function can take are:
 * `"monoH.FC"` (computes a monotone Hermite spline, as described by Fritsch and Carlson)
 * `"hyman"` (computes a monotone cubic spline using Hyman filtering of a `method = "fmm"` input. Note that this method can only be used on inputs which are monotone increasing or monotone decreasing, which is very unlikely in time series data, so we will not explore this method)
 
-Note that these cubic spline interpolation methods are also presented in the Lepot paper.
+Note that these cubic spline interpolation methods are also presented in [3].
 
 The method presented by Forsythe, Malcolm, and Moler, as well as the method presented by Fritsch and Carlson can be used on our sample series from earlier.
 
@@ -994,7 +995,7 @@ The Kalman filter is also sometimes known as the Linear Quadratic Estimation (LQ
 
 An interesting history piece is that one of the very first applications of the Kalman filter was in the Apollo navigation computer. It was applied to the nonlinear problem of trajectory estimation.
 
-Kalman filters are used widely in other scientific fields. For example, they can be used for robotic motion planning and control, as they can be used to model the way that the central nervous system controls our movement.
+Kalman filters are used widely in other scientific fields. For example, they can be used for robotic motion planning and control, as they can be used to model the way that the central nervous system controls our movement[6].
 
 Applying the `na.kalman` function to our example series from before:
 
@@ -1014,7 +1015,7 @@ plot(X2, main = "Kalman Filter with Structural Model", type = "b", ylab = "",
 
 The `na.locf` function in the `imputeTS` package stands for Last Observation Carried Forward. It will interpolate the missing values using either Last Observation Carried Forward (using `option = "locf"`) or Next Observation Carried Backward (using `option = "nocb"`). This is exactly what it sounds like -- Nearest Neighbor interpolation, but worse. Using this function is actually worse than using the Nearest Neighbor interpolation algorithm, as the `na.locf` function forces the user to choose either a left or right neighbor, rather than choosing the **nearest** neighbor.  
 
-The reader may (and should) be shocked to learn of the existence of this function, given that it provides horrid estimates. It should also be noted that a similar function is also included in the `zoo` package. Thus, in not just one, but TWO packages which are heavily used for the analysis of time series, an extremely simple algorithm is implemented and is regularly used.
+The reader may (and should) be shocked to learn of the existence of this function, given that it provides horrid estimates. It should also be noted that a similar function is also included in the `zoo` package. Thus, in not just one, but **two** packages which are heavily used for the analysis of time series, an extremely simple algorithm is implemented and is regularly used.
 
 These functions can be compared on our example series from earlier: 
 
@@ -1169,7 +1170,7 @@ plot(X, main = "Replace with Random Value Between Min and Max", type = "b", ylab
      cex.main = 0.6)
 ```
 
-This is problematic for so many reasons. To begin with, unless the user sets a seed, they will get different results every single time they use the function. If the user forgets to set a seed, they may have to redo some or all of their analysis. Furthermore, picking a random value completely ignores any trends that may be occuring in the data, especially since the random values generated are coming from a uniform distribution, disregarding any kind of structure that may be present and useful for imputing the missing values. Additionally, this function does not take into account the fact that certain values in a time series might be unreachable or might be extremely unlikely to occur. For example, it is possible that observations must be restricted to integers (or that it is highly unlikely to obtain a non-integer observation). The function also replaces all missing values with the same random number, so there might be weird jumps in the interpolated time series that actually make the series harder to analyze overall. 
+This is problematic for so many reasons. To begin with, unless the user sets a seed, they will get different results every single time they use the function. If the user forgets to set a seed, they may have to redo some or all of their analysis. Furthermore, picking a random value completely ignores any trends that may be occuring in the data, especially since the indices of the random values generated are coming from a uniform distribution, disregarding any kind of structure that may be present and useful for imputing the missing values. Additionally, this function does not take into account the fact that certain values in a time series might be unreachable or might be extremely unlikely to occur. For example, it is possible that observations must be restricted to integers (or that it is highly unlikely to obtain a non-integer observation). The function also replaces all missing values with the same random number, so there might be weird jumps in the interpolated time series that actually make the series harder to analyze overall. 
 
 ### Other functions in the imputeTS package 
 
@@ -1179,9 +1180,9 @@ All in all, the `imputeTS` package lacks functionality, and actually provides a 
 
 ## Hybrid Wiener Interpolator 
 
-The final interpolation algorithm that will be explored in this Honours Project is the Hybrid Wiener Interpolator, available in the `tsinterp` package through the `interpolate` function. 
+The final interpolation algorithm that will be explored in this Honours Project is the Hybrid Wiener Interpolator, available in the `tsinterp` package[1] through the `interpolate` function. 
 
-The specifics of this interpolator are far beyond the scope of this course or the author's knowledge base, but a brief overview of the algorithm will be provided. In essence, the algorithm behind this interpolator can be thought of as an "EM algorithm". The first step is an *expectation* step, where the autocovariance function of the process is estimated. Step two of the algorithm is a *maximization* step, where the missing values are estimated, using the resulting ACVF estimate from the first step. 
+The specifics of this interpolator are far beyond the scope of this course or the author's knowledge base, but a brief overview of the algorithm will be provided. In essence, the algorithm behind this interpolator can be thought of as an "EM algorithm". The first step is an *expectation* step, where the autocovariance function of the process is estimated. Step two of the algorithm is a *maximization* step, where the missing values are estimated, using the resulting ACVF estimate from the first step[2]. 
 
 The `interpolate` function of the `tsinterp` package requires both the time series itself, as well as the indices of the missing values in the series. This is noticeably different from other functions presented in this project, which locate the gaps for the user. The gaps can be found very easily by using `which(is.na(x))`. 
 
@@ -1198,7 +1199,7 @@ plot(X, main = "Hybrid Wiener Interpolator", type = "b", ylab = "")
 
 Once an interpolation algorithm has been used on a time series with gaps, the performance of the algorithm must be evaluated. 
 
-One of the existing problems in this field of research is that the criteria used for evaluating the performance of interpolation algorithms has been extremely inconsistent. This may be due to personal opinions of authors, or perhaps it is because authors choose to use whichever criteria will best support their research -- "cherry picking". Another problem that has arisen is that authors in the literature seem to be using different names for the same criteria, perhaps out of personal preference or perhaps in an attempt to sound overly sophisticated. To combat these inconsistencies, it will be useful to have a function which will allow a user to input the original, unaltered and complete time series (let this be known as $x$), and the interpolated series after gaps have been imposed and filled (let the interpolated series be known as $X$). This function should then output a number of performance criteria. 
+One of the existing problems in this field of research is that the criteria used for evaluating the performance of interpolation algorithms has been extremely inconsistent[3]. This may be due to personal opinions of authors, or perhaps it is because authors choose to use whichever criteria will best support their research -- "cherry picking". Another problem that has arisen is that authors in the literature seem to be using different names for the same criteria, perhaps out of personal preference or perhaps in an attempt to sound overly sophisticated. To combat these inconsistencies, it will be useful to have a function which will allow a user to input the original, unaltered and complete time series (let this be known as $x$), and the interpolated series after gaps have been imposed and filled (let the interpolated series be known as $X$). This function should then output a number of performance criteria. 
 
 In the following sections, performance criteria from Table 1 of *Interpolation in Time Series: An Introductive Overview of Existing Methods, Their Performance Criteria and Uncertainty Assessment* will be presented. They will be implented in R.
 
@@ -1214,13 +1215,13 @@ $$
 r = \frac{\sum_{i = 1}^n(X_i - \bar{X})(x_i - \bar{x})}{\sqrt{\sum_{i=1}^n(X_i - \bar{X})^2 \sum_{i=1}^n(x_i - \bar{x})^2}}
 $$ 
 
-However, upon using this formula on real data, I realized that this formula is actually incorrect. The formula *should* have been presented in Table 1 as: 
+However, upon using this formula on real data, it was realized that this formula is actually incorrect. The formula *should* have been presented in Table 1 as: 
 
 $$
 r = \frac{\sum_{i = 1}^n(X_i - \bar{X})(x_i - \bar{x})}{\sqrt{\sum_{i=1}^n(X_i - \bar{X})^2} \sqrt{\sum_{i=1}^n(x_i - \bar{x})^2}}
 $$ 
 
-which is significantly different from the formula presented in the mentioned paper. The correct formula forces values to be between -1 and +1. 
+which is significantly different from the formula presented in [3]. The correct formula forces values to be between -1 and +1. 
 
 ### Squared Coefficent of Correlation 
 
@@ -1270,7 +1271,7 @@ $$
 
 The Mean Relative Error (MRE) takes the relative differences between the true values and the interpolated values. 
 
-The formula presented in Table 1 of the paper is not represented in a mathematically correct way. The correct formula is:
+The formula presented in Table 1 of [3] is not represented in a mathematically correct way. The correct formula is:
 
 $$
 \mathbf{MRE} = \sum_{i = 1}^n \frac{x_i - X_i}{x_i}
@@ -1328,7 +1329,7 @@ Again, this is only usable if $x_i \neq 0 \quad \forall i$.
 
 ### Mean Squares Error 
 
-The Mean Squares Error (denoted NMSE) is not really what it sounds like. It appears to have only been used in one paper. Its definition is:
+The Mean Squares Error (denoted NMSE) is not really what it sounds like. According to [3], it appears to be rarely present in the literature. Its definition is:
 
 $$
 \mathbf{NMSE} = \frac{\sum_{i=1}^n(x_i - X_i)^2}{\sum_{i=1}^n (x_i - \bar{x})^2 }
@@ -1385,7 +1386,7 @@ Interesting future work might be to create a new criterion for evaluating the pe
 # Testing and Benchmarking a Variety of Algorithms
 
 Now that a number of algorithms and performance criteria have been presented, they will be tested on a variety of real-world time series and their performance will be evaluated. 
-The code for this analysis is far too long to include in this report, but the following general approach was taken for each obtained time series: 
+The code for this analysis is far too long to include in this report (and is instead included in the accompanying folder), but the following general approach was taken for each obtained time series: 
 
 * Use the `sample` function to randomly remove $\alpha \%$ of points from the original, unaltered time series; call this series `gapped_series` 
 * Use a loop to pass `gapped_series` to all 18 of the interpolation algorithms described above
@@ -1429,7 +1430,7 @@ plot(sunspots, type = "l",
 
 ### The Solar Flux Dataset
 
-The third and most complex dataset that was used for this project is one which is readily available in Wesley Burr's `tsinterp` package, entitled `flux`. This dataset contains daily measurements of solar flux. *Solar flux* is a measure of how much light energy is being radiated in a given area, and in this dataset it is measured in solar flux units (SFU). 
+The third and most complex dataset that was used for this project is one which is readily available in Wesley Burr's `tsinterp` package[1], entitled `flux`. This dataset contains daily measurements of solar flux. *Solar flux* is a measure of how much light energy is being radiated in a given area, and in this dataset it is measured in solar flux units (SFU)[8]. 
 
 This dataset contains two separate time series of daily noon 10.7cm solar flux measurements. The first is from the United States Air Force (USAF) monitoring station in Sagamore Hill, Massachussetts. The second is from the Dominion Radio and Astronomical Observatory (DRAO) in Penticton, British Columbia. The only time period of interest is that for which measurements are available in both of the aforementioned series. For this reason, both series include measurements from May 1st, 1966, until January 31st, 2008. The Penticton series is continuous, with no missing data points, while the Sagamore Hill series has a number of missing points. 
 
@@ -1608,7 +1609,7 @@ Another important note is that some of the performance criteria are largely inef
 load("~/School/Trent/Fourth Year/MATH4800/Performances/best_performance_0.20.RDa")
 load("~/School/Trent/Fourth Year/MATH4800/Performances/worst_performance_0.20.RDa")
 kable(best_performance_0.20, "latex", booktabs = TRUE) %>%
-  kable_styling(latex_options = "striped")
+  kable_styling(latex_options = c("striped", "scale_down"))
 kable(worst_performance_0.20, "latex", booktabs = TRUE) %>%
   kable_styling(latex_options = c("striped", "scale_down"))
 ```
@@ -1629,11 +1630,11 @@ For this project, the gaps were simply selected using the `sample` function in `
 
 ### Repetition 
 
-This entire experiment was only run once, with one seed value. It would be ideal to run this experiment 1000s of times to obtain better results, but this would require significant computational power.
+This entire experiment was only run once, with one seed value. It would be ideal to run this experiment thousands of times with many different seeds, in order to obtain better results, but this would require significant computational power.
 
 ### Increase and refine algorithms and criteria
 
-An obvious extension would be to add more algorithms and performance criteria to the experiment. A great starting place would be to add a "calculation time" criteria, which would favour algorithms that are fast. 
+An obvious extension would be to add more algorithms and performance criteria to the experiment. A great starting place would be to add a "calculation time" criterion, which would favour algorithms that are fast. 
 
 A revision should also be done to determine which algorithms and criteria are worth including in the experiment. For example, it is a bit silly to waste computational resources on methods such as "replace with random" or "replace with mode", when they will never be the best performers. Instead, by keeping these methods in the analysis, more interesting results are being hidden (i.e., perhaps one of the "better" algorithms is performing terribly, but since it is being compared to "replace with random", its performance appears to be falsely inflated). Similarly, criteria which were ineffective should be not included, because they waste time and distract the analyst from more important results. 
 
@@ -1655,22 +1656,21 @@ Kalman Filters and Weighted Moving Averages were found to perform particularly w
 
 # References
 
-1. https://stackoverflow.com/questions/44008828/r-markdown-format-title-pdf-output
+[1] Wesley S. Burr. *Air Pollution and Health: Time Series Tools and Analysis*. Queen's University, PhD thesis.
+2012.
 
-2. https://stackoverflow.com/questions/30972442/how-to-separate-title-page-and-table-of-content-page-from-knitr-rmarkdown-pdf
+[2] Wesley S. Burr (2012). *tsinterp: A Time Series Interpolation Package for R*. `R` Package.
 
-3. http://www.brightsourceenergy.com/understanding-solar-flux-science-vs-science-fiction-1
+[3] Mathieu Lepot, Jean-Baptiste Aubin, and Francois H.L.R. Clemens. *Interpolation in Time Series: An Introductive Overview of Existing Methods, Their Performance and Uncertainty Assessment.* Water 2017, 9(10),
+796.
 
-4. https://haozhu233.github.io/kableExtra/awesome_table_in_pdf.pdf
+[4] Peter J. Brockwell and Richard A. Davis. *Time Series: Theory and Methods.* Springer. 2006.
 
-5. https://stackoverflow.com/questions/12995683/any-way-to-make-plot-points-in-scatterplot-more-transparent-in-r
+[5] Data Camp. *Introduction to Time Series Analysis*. Data Camp course. 
 
-6. https://www.analyticsvidhya.com/blog/2015/12/complete-tutorial-time-series-modeling/
+[6] Wikipedia, the Free Encyclopedia. *Kalman Filter*. Web. Retrieved 20 February 2019, https://en.wikipedia.org/wiki/Kalman_filter.
 
-7. https://tex.stackexchange.com/questions/32140/how-to-write-a-function-piecewise-with-bracket-outside
+[7] Wikiversity. *Cubic Spline Interpolation*. Web. Retrieved 20 February 2019, https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation.
 
-8. https://stackoverflow.com/questions/14450384/create-a-vector-of-all-days-between-two-dates
+[8] Desmond, Joe. *Understanding Solar Flux: Science vs. Science Fiction*. Web. 19 August 2014. Retrieved 30 January 2019, http://www.brightsourceenergy.com/understanding-solar-flux-science-vs-science-fiction-1. 
 
-9. https://en.wikipedia.org/wiki/Kalman_filter
-
-10. https://en.wikiversity.org/wiki/Cubic_Spline_Interpolation
